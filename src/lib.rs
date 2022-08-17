@@ -18,6 +18,10 @@ pub fn derive(input: TokenStream) -> TokenStream {
     let component_msg_name = format!("{}Msg", component_ident);
     let component_msg_ident = syn::Ident::new(&component_msg_name, name.span());
 
+    // Generate the onsubmit fn name to look for
+    let onsubmit_fn_name = format!("{}_onsubmit", name).to_case(Case::Snake);
+    let onsubmit_fn_ident = syn::Ident::new(&onsubmit_fn_name, name.span());
+
     // Get the fields of the struct (Not implemented for Enums or TupleStructs)
     let fields = if let syn::Data::Struct(syn::DataStruct {
         fields: syn::Fields::Named(syn::FieldsNamed { ref named, .. }),
@@ -54,6 +58,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
         
     });
 
+    // Create the msg variants for updating each field
     let msg_variants = fields.iter().map(|field| {
         let field_ident = field.ident.clone().unwrap();
         let field_type = field.ty.clone();
@@ -64,9 +69,9 @@ pub fn derive(input: TokenStream) -> TokenStream {
         quote! { #msg_variant_ident(#field_type) }
     });
 
+    // Create the match arms for the update fn
     let match_arms_update = fields.iter().map(|field| {
         let field_ident = field.ident.clone().unwrap();
-        let field_type = field.ty.clone();
 
         let msg_variant = format!("update_{}", field_ident).to_case(Case::UpperCamel);
         let msg_variant_ident = syn::Ident::new(&msg_variant, name.span());
@@ -77,6 +82,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
         } }
     });
 
+    // Create the actual html elements for the inside of the form for the view fn
     let form_fields = fields.iter().map(|field| {
         let field_ident = field.ident.clone().unwrap();
 
@@ -120,9 +126,6 @@ pub fn derive(input: TokenStream) -> TokenStream {
 
     quote! {
 
-        use wasm_bindgen::JsCast;
-        use web_sys::HtmlInputElement;
-
         pub struct #component_ident {
             inner: #name,
             submitted: bool
@@ -152,6 +155,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
                     #(#match_arms_update,)*
 
                     #component_msg_ident::OnSubmit => {
+                        #onsubmit_fn_ident(self.inner.clone());
                         true
                     }
                 }
