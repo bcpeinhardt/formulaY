@@ -126,6 +126,14 @@ pub fn derive(input: TokenStream) -> TokenStream {
 
     quote! {
 
+        impl #name {
+            pub fn new() -> Self {
+                Self {
+                    #(#component_field_inits,)*
+                }
+            }
+        }
+
         pub struct #component_ident {
             inner: #name,
             submitted: bool
@@ -143,9 +151,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
 
             fn create(_ctx: &Context<Self>) -> Self {
                 Self {
-                    inner: #name {
-                        #(#component_field_inits,)*
-                    },
+                    inner: #name::new(),
                     submitted: false
                 }
             }
