@@ -7,23 +7,18 @@ autotest = false
 [lib]
 proc-macro = true
 
-[[bin]]
-name = "derived_form"
-path = "src/bin.rs"
-
-[[test]]
-name = "tests"
-path = "tests/tests.rs"
+[[example]]
+name = "basic_form" 
 
 [dev-dependencies]
-trybuild = "1.0"
-
-[dependencies]
-convert_case = "0.5.0"
-gloo = "0.8.0"
-quote = "1.0.21"
-syn = { version = "1.0.99", features = ["extra-traits"] }
 wasm-bindgen = "0.2.78"
 web-sys = { version="^0.3.0", features=["HtmlInputElement"]}
 yew = "0.19"
 yew-router = "0.16.0"
+gloo = "0.8.0"
+
+[dependencies]
+convert_case = "0.5.0"
+quote = "1.0.21"
+syn = { version = "1.0.99", features = ["extra-traits"] }
+
