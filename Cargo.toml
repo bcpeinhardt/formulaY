@@ -6,6 +6,7 @@ autotest = false
 
 [lib]
 proc-macro = true
+path = "src/lib.rs"
 
 [[example]]
 name = "basic_form" 

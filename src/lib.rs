@@ -1,3 +1,14 @@
+//! This crate provides a macro for deriving a yew component from a custom struct which represents 
+//! a set of form inputs. The desired mvp is to be able to
+//! 
+//! - [x] Support String fields as text input
+//! - [x] Support bool fields as checkbox input
+//! - [ ] Support passing an onsubmit function as a prop
+//! - [ ] Support for passing css styling as a prop
+//! 
+//! For an example of how the macro is intended to be used see `examples/basic_form.rs` 
+
+
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, DeriveInput};
@@ -17,6 +28,10 @@ pub fn derive(input: TokenStream) -> TokenStream {
     // Generate the Message Ident
     let component_msg_name = format!("{}Msg", component_ident);
     let component_msg_ident = syn::Ident::new(&component_msg_name, name.span());
+
+    // Generate the Prop Ident
+    let component_prop_name = format!("{}Props", component_ident);
+    let component_prop_ident = syn::Ident::new(&component_prop_name, name.span());
 
     // Generate the onsubmit fn name to look for
     let onsubmit_fn_name = format!("{}_onsubmit", name).to_case(Case::Snake);
@@ -156,7 +171,8 @@ pub fn derive(input: TokenStream) -> TokenStream {
                 }
             }
 
-            fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
+            fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
+
                 match msg {
                     #(#match_arms_update,)*
 
