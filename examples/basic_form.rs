@@ -11,6 +11,8 @@ pub struct Data {
     pub agree_to_terms: bool,
 }
 
+// For now, the name for the onsubmit fn is automatically derived from the name 
+// of the struct, but this is ultra temporary.
 fn data_onsubmit(data: Data) {
     let msg = format!("Data succesfully passed! {:?}", data);
     log!(msg);
