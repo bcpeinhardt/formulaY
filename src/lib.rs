@@ -3,7 +3,7 @@
 //! 
 //! - [x] Support String fields as text input
 //! - [x] Support bool fields as checkbox input
-//! - [ ] Support passing an onsubmit function as a prop
+//! - [x] Support passing an onsubmit function as a prop
 //! - [ ] Support for passing css styling as a prop
 //! - [ ] Support for regex validation for String fields
 //! 
@@ -49,10 +49,6 @@ pub fn derive(input: TokenStream) -> TokenStream {
     // Generate the Prop Ident
     let component_prop_name = format!("{}Props", component_ident);
     let component_prop_ident = syn::Ident::new(&component_prop_name, name.span());
-
-    // Generate the onsubmit fn name to look for
-    let onsubmit_fn_name = format!("{}_onsubmit", name).to_case(Case::Snake);
-    let onsubmit_fn_ident = syn::Ident::new(&onsubmit_fn_name, name.span());
 
     // Get the fields of the struct (Not implemented for Enums or TupleStructs)
     let fields = if let syn::Data::Struct(syn::DataStruct {
@@ -177,9 +173,14 @@ pub fn derive(input: TokenStream) -> TokenStream {
             OnSubmit
         }
 
+        #[derive(PartialEq, Properties)]
+        pub struct #component_prop_ident {
+            onsubmit: Callback<#name>
+        }
+
         impl Component for #component_ident {
             type Message = #component_msg_ident;
-            type Properties = ();
+            type Properties = #component_prop_ident;
 
             fn create(_ctx: &Context<Self>) -> Self {
                 Self {
@@ -194,7 +195,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
                     #(#match_arms_update,)*
 
                     #component_msg_ident::OnSubmit => {
-                        #onsubmit_fn_ident(self.inner.clone());
+                        ctx.props().onsubmit.emit(self.inner.clone());
                         true
                     }
                 }
