@@ -7,7 +7,7 @@
 //! - [x] Support for custom css styling
 //! - [ ] Support for regex validation for String fields
 //! - [ ] Support for number type fields with automatic parsing validation
-//! - [ ] Support for required checkboxes
+//! - [ ] Support for required and optional fields with Option type
 //! - [ ] Auto applied classes for required fields after submit attempt
 //! - [ ] Clean up how user imports requirements
 //! 
