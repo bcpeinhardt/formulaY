@@ -1,0 +1,11 @@
+/home/bcpeinhardt/Development/formulaY/usage/target/debug/deps/convert_case-da8c7c4306de3242.rmeta: /home/bcpeinhardt/.cargo/registry/src/github.com-1ecc6299db9ec823/convert_case-0.5.0/src/lib.rs /home/bcpeinhardt/.cargo/registry/src/github.com-1ecc6299db9ec823/convert_case-0.5.0/src/case.rs /home/bcpeinhardt/.cargo/registry/src/github.com-1ecc6299db9ec823/convert_case-0.5.0/src/converter.rs /home/bcpeinhardt/.cargo/registry/src/github.com-1ecc6299db9ec823/convert_case-0.5.0/src/pattern.rs /home/bcpeinhardt/.cargo/registry/src/github.com-1ecc6299db9ec823/convert_case-0.5.0/src/segmentation.rs
+
+/home/bcpeinhardt/Development/formulaY/usage/target/debug/deps/libconvert_case-da8c7c4306de3242.rlib: /home/bcpeinhardt/.cargo/registry/src/github.com-1ecc6299db9ec823/convert_case-0.5.0/src/lib.rs /home/bcpeinhardt/.cargo/registry/src/github.com-1ecc6299db9ec823/convert_case-0.5.0/src/case.rs /home/bcpeinhardt/.cargo/registry/src/github.com-1ecc6299db9ec823/convert_case-0.5.0/src/converter.rs /home/bcpeinhardt/.cargo/registry/src/github.com-1ecc6299db9ec823/convert_case-0.5.0/src/pattern.rs /home/bcpeinhardt/.cargo/registry/src/github.com-1ecc6299db9ec823/convert_case-0.5.0/src/segmentation.rs
+
+/home/bcpeinhardt/Development/formulaY/usage/target/debug/deps/convert_case-da8c7c4306de3242.d: /home/bcpeinhardt/.cargo/registry/src/github.com-1ecc6299db9ec823/convert_case-0.5.0/src/lib.rs /home/bcpeinhardt/.cargo/registry/src/github.com-1ecc6299db9ec823/convert_case-0.5.0/src/case.rs /home/bcpeinhardt/.cargo/registry/src/github.com-1ecc6299db9ec823/convert_case-0.5.0/src/converter.rs /home/bcpeinhardt/.cargo/registry/src/github.com-1ecc6299db9ec823/convert_case-0.5.0/src/pattern.rs /home/bcpeinhardt/.cargo/registry/src/github.com-1ecc6299db9ec823/convert_case-0.5.0/src/segmentation.rs
+
+/home/bcpeinhardt/.cargo/registry/src/github.com-1ecc6299db9ec823/convert_case-0.5.0/src/lib.rs:
+/home/bcpeinhardt/.cargo/registry/src/github.com-1ecc6299db9ec823/convert_case-0.5.0/src/case.rs:
+/home/bcpeinhardt/.cargo/registry/src/github.com-1ecc6299db9ec823/convert_case-0.5.0/src/converter.rs:
+/home/bcpeinhardt/.cargo/registry/src/github.com-1ecc6299db9ec823/convert_case-0.5.0/src/pattern.rs:
+/home/bcpeinhardt/.cargo/registry/src/github.com-1ecc6299db9ec823/convert_case-0.5.0/src/segmentation.rs:

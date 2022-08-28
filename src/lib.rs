@@ -4,26 +4,79 @@
 //! - [x] Support String fields as text input
 //! - [x] Support bool fields as checkbox input
 //! - [x] Support passing an onsubmit function as a prop
-//! - [ ] Support for passing css styling as a prop
+//! - [x] Support for custom css styling
 //! - [ ] Support for regex validation for String fields
+//! - [ ] Support for number type fields with automatic parsing validation
+//! - [ ] Support for required checkboxes
+//! - [ ] Auto applied classes for required fields after submit attempt
+//! - [ ] Clean up how user imports requirements
 //! 
+//! # Example
+//! ```
+//! use formula_y::YForm;
+//! use gloo::console::log;
+//! use wasm_bindgen::JsCast;
+//! use web_sys::HtmlInputElement;
+//! 
+//! use yew::prelude::*;
+//! 
+//! #[derive(Debug, Clone, YForm)]
+//! pub struct Data {
+//!     pub email: String,
+//!     pub agree_to_terms: bool,
+//! }
+//! 
+//! #[function_component(Index)]
+//! pub fn index() -> Html {
+//! 
+//!    let onsubmit = Callback::from(|data: Data| {
+//!         let msg = format!("Data succesfully passed! {:?}", data);
+//!         log!(msg);
+//!    });
+//! 
+//!    html! { <DataForm {onsubmit} /> }
+//! }
+//! 
+//! fn main() {
+//!    yew::start_app::<Index>();
+//! }
+//! ```
+//! 
+//! This produces the following html
+//! ```html
+//! <form class="data-form formula-y-form">
+//!     <label class="email-label formula-y-txt-label">Email</label>
+//!     <input type="text" class="email-input formula-y-txt-input">
+//!     <label class="agree-to-terms-label formula-y-checkbox-label">Agree To Terms</label>
+//!     <input type="checkbox" class="agree-to-terms-input formula-y-checkbox">
+//!     <button>Submit</button>
+//! </form>
+//! ```
+//! 
+//! # How
 //! Basically, the form will maintain an instance of the struct where each value is equal to the current input 
-//! value of the form. Then the user can provide an onsubmit function with the signature
-//! `fn(data: Data) -> ()` where `Data` is the type the form is derived from for the onsubmit. For instance,
+//! value of the form. Then the user can provide an onsubmit function as a `Callback<T>` where `T` 
+//! is the type the form is derived from for the onsubmit. For instance,
 //! said function might make a POST request with the struct as the request body.
 //! 
+//! 
+//! # Why
 //! One of the cool things about using Rust for web is that you can use the same language on the frontend and 
 //! the backend, just like JavaScript. One of the driving use cases for this library is to define a struct one time in a 
 //! common lib, and then use it both on the backend for setting up crud api endpoints and on the frontend for 
 //! deriving forms from.
 //! 
-//! For an example of how the macro is intended to be used see examples/basic_form.rs. 
+//! For an example of how the macro is intended to be used see usage/src/main.rs. 
 //! 
 //! To see the produced 
-//! html, run `trunk serve --open`. Try submitting the form and you should see a log message from the provided onsubmit
-//! in the console.
+//! html, run `trunk serve --open` from the usage directory. Try submitting the form and you should see a log message from the provided onsubmit
+//! in the console. 
 //! 
-//! To see the expanded yew code for the example, run `cargo expand --example basic_form`. 
+//! # Styling
+//! For the moment, the easiest way to style the elements is to use the auto-generated classnames. Each field and label get specific class 
+//! names and general class names for hooking into. 
+//! 
+//! To see the expanded yew code for the example, run `cargo expand --bin usage`. 
 
 
 use proc_macro::TokenStream;
@@ -117,12 +170,16 @@ pub fn derive(input: TokenStream) -> TokenStream {
         let msg_variant = format!("update_{}", field_ident).to_case(Case::UpperCamel);
         let msg_variant_ident = syn::Ident::new(&msg_variant, name.span());
 
-        let label = format!("{}", field_ident);
+        let label = format!("{}", field_ident).to_case(Case::Title);
 
         if ty_is_string(field) {
+
+            let label_class = format!("{} formula-y-txt-label", format!("{}-label", field_ident).to_case(Case::Kebab));
+            let input_class = format!("{} formula-y-txt-input", format!("{}-input", field_ident).to_case(Case::Kebab));
+
             quote! {
-                <label>{#label}</label>
-                <input type="text" onchange={ctx.link().callback(move |event: Event| {
+                <label class={#label_class}>{#label}</label>
+                <input class={#input_class} type="text" onchange={ctx.link().callback(move |event: Event| {
                     let new_value = event
                         .target()
                         .unwrap()
@@ -133,9 +190,13 @@ pub fn derive(input: TokenStream) -> TokenStream {
                 })} />
             }
         } else if ty_is_bool(field) {
+
+            let label_class = format!("{} formula-y-checkbox-label", format!("{}-label", field_ident).to_case(Case::Kebab));
+            let input_class = format!("{} formula-y-checkbox", format!("{}-input", field_ident).to_case(Case::Kebab));
+
             quote! {
-                <label>{#label}</label>
-                <input type="checkbox" checked={self.inner.#field_ident} onchange={ctx.link().callback(move |event: Event| {
+                <label class={#label_class}>{#label}</label>
+                <input class={#input_class} type="checkbox" checked={self.inner.#field_ident} onchange={ctx.link().callback(move |event: Event| {
                     let new_value = event
                         .target()
                         .unwrap()
@@ -151,6 +212,8 @@ pub fn derive(input: TokenStream) -> TokenStream {
             }
         }
     });
+
+    let form_class = format!("{}-form formula-y-form", format!("{}", name).to_case(Case::Kebab));
 
     quote! {
 
@@ -175,7 +238,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
 
         #[derive(PartialEq, Properties)]
         pub struct #component_prop_ident {
-            onsubmit: Callback<#name>
+            pub onsubmit: Callback<#name>
         }
 
         impl Component for #component_ident {
@@ -205,7 +268,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
 
                 let link = ctx.link();
                 html! {
-                    <form onsubmit={link.callback(|e: FocusEvent| {
+                    <form class={#form_class} onsubmit={link.callback(|e: FocusEvent| {
                         e.prevent_default();
 
                         #component_msg_ident::OnSubmit
