@@ -1,1 +1,0 @@
-/home/bcpeinhardt/Development/formulaY/usage/target/wasm32-unknown-unknown/release/usage.wasm: /home/bcpeinhardt/Development/formulaY/src/lib.rs /home/bcpeinhardt/Development/formulaY/usage/src/main.rs
