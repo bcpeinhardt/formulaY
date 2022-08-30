@@ -25,8 +25,8 @@ pub fn index() -> Html {
     // some defaults already set. Chances are you'll pull this
     // from an api request as well.
     let init = Data {
-        name: None,
-        email: String::new(),
+        name: Some("Ben".to_string()),
+        email: "test@gmail.com".to_string(),
         agree_to_terms: false,
 
         // Have this checked by default
