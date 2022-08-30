@@ -16,14 +16,17 @@ pub struct Data {
 #[function_component(Index)]
 pub fn index() -> Html {
 
+    // The onsubmit is the only required prop. It tells the form 
+    // what to do when your user clicks the submit btn.
     let onsubmit = Callback::from(|data: Data| {
         let msg = format!("Data succesfully passed! {:?}", data);
         log!(msg);
     });
 
-    // This part is optional, but sometimes you want to have 
-    // some defaults already set. Chances are you'll pull this
-    // from an api request as well.
+    // Optional props
+
+    // You can set an initial value for the inner struct.
+    // Useful for setting up forms with defaults already in place
     let init = Data {
         name: Some("Ben".to_string()),
         email: "test@gmail.com".to_string(),
@@ -33,7 +36,12 @@ pub fn index() -> Html {
         subscribe_to_updates: Some(true),
     };
 
-    html! { <DataForm {onsubmit} {init} /> }
+    // I dont really have a good reason not to provide this option,
+    // and I can see use cases where it increases the reusability
+    // of forms.
+    let enforce_required_fields = true;
+
+    html! { <DataForm {onsubmit} {init} {enforce_required_fields} /> }
 }
 
 fn main() {
