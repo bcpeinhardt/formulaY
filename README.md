@@ -6,10 +6,11 @@ a set of form inputs. The desired mvp is to be able to
 - [x] Support String fields as text input
 - [x] Support bool fields as checkbox input
 - [x] Support passing an onsubmit function as a prop
+- [x] Support for initializing form with default values
 - [x] Support for custom css styling
 - [ ] Support for regex validation for String fields
 - [ ] Support for number type fields with automatic parsing validation
-- [ ] Support for required and optional fields with Option type
+- [x] Support for required and optional fields with Option type
 - [ ] Auto applied classes for required fields after submit attempt
 - [ ] Clean up how user imports requirements
 

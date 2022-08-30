@@ -4,10 +4,11 @@
 //! - [x] Support String fields as text input
 //! - [x] Support bool fields as checkbox input
 //! - [x] Support passing an onsubmit function as a prop
+//! - [x] Support for initializing form with default values
 //! - [x] Support for custom css styling
 //! - [ ] Support for regex validation for String fields
 //! - [ ] Support for number type fields with automatic parsing validation
-//! - [ ] Support for required and optional fields with Option type
+//! - [x] Support for required and optional fields with Option type
 //! - [ ] Auto applied classes for required fields after submit attempt
 //! - [ ] Clean up how user imports requirements
 //! 
@@ -81,7 +82,7 @@
 
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, DeriveInput};
+use syn::{parse_macro_input, DeriveInput, Type, PathArguments, GenericArgument};
 use convert_case::{Case, Casing};
 
 #[proc_macro_derive(YForm)]
@@ -123,7 +124,40 @@ pub fn derive(input: TokenStream) -> TokenStream {
     };
 
     let ty_is_string = |field: &syn::Field| ty_is("String", field); 
-    let ty_is_bool = |field: &syn::Field| ty_is("bool", field); 
+    let ty_is_bool = |field: &syn::Field| ty_is("bool", field);
+    let ty_is_option = |field: &syn::Field| ty_is("Option", field); 
+
+    let ty_is_optionized = |type_as_str: &str, field: &syn::Field | {
+        if ty_is_option(field) {
+            let ty = match field.ty.clone() {
+                Type::Path(typepath) if typepath.qself.is_none() => {
+                    // Get the first segment of the path (there is only one, in fact: "Option"):
+                    let type_params = typepath.path.segments[0].arguments.clone();
+                    // It should have only on angle-bracketed param ("<String>"):
+                    let generic_arg = match type_params {
+                        PathArguments::AngleBracketed(params) => params.args[0].clone(),
+                        _ => panic!("TODO: error handling"),
+                    };
+                    // This argument must be a type:
+                    match generic_arg {
+                        GenericArgument::Type(ty) => ty,
+                        _ => panic!("TODO: error handling"),
+                    }
+                }
+                _ => panic!("TODO: error handling"),
+            };
+
+            if let syn::Type::Path(ref p) = ty {
+                return p.path.segments.len() == 1 && p.path.segments[0].ident == type_as_str;
+            }
+            false
+        } else {
+            false
+        }
+    }; 
+
+    let ty_is_optionized_string = |field: &syn::Field| ty_is_optionized("String", field);
+    let ty_is_optionized_bool = |field: &syn::Field| ty_is_optionized("bool", field);
 
     // Create the fields for initializing the struct
     let component_field_inits = fields.iter().map(|field| {
@@ -132,6 +166,8 @@ pub fn derive(input: TokenStream) -> TokenStream {
             quote! { #field_ident: String::new() }
         } else if ty_is_bool(field) {
             quote! { #field_ident: false }
+        } else if ty_is_option(field) {
+            quote! { #field_ident: None }
         } else {
             panic!("Field type not supported");
         }
@@ -163,6 +199,27 @@ pub fn derive(input: TokenStream) -> TokenStream {
         } }
     });
 
+    // Get the required fields 
+    let required_string_fields: Vec<&syn::Field> = fields.iter().filter(|field| ty_is_string(field)).collect();
+    let checks = required_string_fields.iter().map(|field| {
+        let field_ident = field.ident.clone().unwrap();
+        quote! {
+            if self.inner.#field_ident == "" {
+                return false;
+            }
+        }
+    });
+
+    let required_bool_fields: Vec<&syn::Field> = fields.iter().filter(|field| ty_is_bool(field)).collect();
+    let bool_checks = required_bool_fields.iter().map(|field| {
+        let field_ident = field.ident.clone().unwrap();
+        quote! {
+            if !self.inner.#field_ident {
+                return false;
+            }
+        }
+    });
+
     // Create the actual html elements for the inside of the form for the view fn
     let form_fields = fields.iter().map(|field| {
         let field_ident = field.ident.clone().unwrap();
@@ -174,10 +231,13 @@ pub fn derive(input: TokenStream) -> TokenStream {
 
         if ty_is_string(field) {
 
-            let label_class = format!("{} formula-y-txt-label", format!("{}-label", field_ident).to_case(Case::Kebab));
-            let input_class = format!("{} formula-y-txt-input", format!("{}-input", field_ident).to_case(Case::Kebab));
+            let label_class = format!("{} formula-y-txt-label required", format!("{}-label", field_ident).to_case(Case::Kebab));
+            let input_class = format!("{} formula-y-txt-input required", format!("{}-input", field_ident).to_case(Case::Kebab));
 
             quote! {
+                if self.inner.#field_ident == "" && self.display_required_warnings {
+                    <span style="color: red;" class="formul-y-required-asterisk">{"*"}</span>
+                }
                 <label class={#label_class}>{#label}</label>
                 <input class={#input_class} type="text" onchange={ctx.link().callback(move |event: Event| {
                     let new_value = event
@@ -191,10 +251,13 @@ pub fn derive(input: TokenStream) -> TokenStream {
             }
         } else if ty_is_bool(field) {
 
-            let label_class = format!("{} formula-y-checkbox-label", format!("{}-label", field_ident).to_case(Case::Kebab));
-            let input_class = format!("{} formula-y-checkbox", format!("{}-input", field_ident).to_case(Case::Kebab));
+            let label_class = format!("{} formula-y-checkbox-label required", format!("{}-label", field_ident).to_case(Case::Kebab));
+            let input_class = format!("{} formula-y-checkbox required", format!("{}-input", field_ident).to_case(Case::Kebab));
 
             quote! {
+                if !self.inner.#field_ident && self.display_required_warnings {
+                    <span style="color: red;">{"*"}</span>
+                }
                 <label class={#label_class}>{#label}</label>
                 <input class={#input_class} type="checkbox" checked={self.inner.#field_ident} onchange={ctx.link().callback(move |event: Event| {
                     let new_value = event
@@ -204,6 +267,43 @@ pub fn derive(input: TokenStream) -> TokenStream {
                         .checked();
     
                     #component_msg_ident::#msg_variant_ident(new_value)
+                })} />
+            }
+        } else if ty_is_optionized_string(field) {
+            let label_class = format!("{} formula-y-txt-label", format!("{}-label", field_ident).to_case(Case::Kebab));
+            let input_class = format!("{} formula-y-txt-input", format!("{}-input", field_ident).to_case(Case::Kebab));
+
+            quote! {
+                <label class={#label_class}>{#label}</label>
+                <input class={#input_class} type="text" onchange={ctx.link().callback(move |event: Event| {
+                    let new_value = event
+                        .target()
+                        .unwrap()
+                        .unchecked_into::<HtmlInputElement>()
+                        .value();
+    
+                    if new_value == "" {
+                        #component_msg_ident::#msg_variant_ident(None)
+                    } else {
+                        #component_msg_ident::#msg_variant_ident(Some(new_value))
+                    }
+                })} />
+            }
+        } else if ty_is_optionized_bool(field) {
+
+            let label_class = format!("{} formula-y-checkbox-label", format!("{}-label", field_ident).to_case(Case::Kebab));
+            let input_class = format!("{} formula-y-checkbox", format!("{}-input", field_ident).to_case(Case::Kebab));
+
+            quote! {
+                <label class={#label_class}>{#label}</label>
+                <input class={#input_class} type="checkbox" checked={self.inner.#field_ident.unwrap_or_default()} onchange={ctx.link().callback(move |event: Event| {
+                    let new_value = event
+                        .target()
+                        .unwrap()
+                        .unchecked_into::<HtmlInputElement>()
+                        .checked();
+    
+                    #component_msg_ident::#msg_variant_ident(Some(new_value))
                 })} />
             }
         } else {
@@ -227,28 +327,49 @@ pub fn derive(input: TokenStream) -> TokenStream {
 
         pub struct #component_ident {
             inner: #name,
+            display_required_warnings: bool,
             submitted: bool
+        }
+
+        impl #component_ident {
+            pub fn required_components_provided(&self) -> bool {
+                #(#checks)* 
+
+                #(#bool_checks)* 
+
+                true
+            }
         }
 
         pub enum #component_msg_ident {
             #(#msg_variants,)*
 
-            OnSubmit
+            OnSubmit,
+            DisplayRequiredWarnings
         }
 
         #[derive(PartialEq, Properties)]
         pub struct #component_prop_ident {
-            pub onsubmit: Callback<#name>
+            pub onsubmit: Callback<#name>,
+            pub init: Option<#name>
         }
 
         impl Component for #component_ident {
             type Message = #component_msg_ident;
             type Properties = #component_prop_ident;
 
-            fn create(_ctx: &Context<Self>) -> Self {
+            fn create(ctx: &Context<Self>) -> Self {
+
+                let inner = if let Some(init) = &ctx.props().init {
+                    init.clone()
+                } else {
+                    #name::new()
+                };
+
                 Self {
-                    inner: #name::new(),
-                    submitted: false
+                    inner,
+                    submitted: false,
+                    display_required_warnings: false
                 }
             }
 
@@ -258,7 +379,17 @@ pub fn derive(input: TokenStream) -> TokenStream {
                     #(#match_arms_update,)*
 
                     #component_msg_ident::OnSubmit => {
-                        ctx.props().onsubmit.emit(self.inner.clone());
+
+                        if self.required_components_provided() {
+                            ctx.props().onsubmit.emit(self.inner.clone());
+                            self.submitted = true;
+                        } else {
+                            ctx.link().send_message(#component_msg_ident::DisplayRequiredWarnings);
+                        }
+                        true
+                    },
+                    #component_msg_ident::DisplayRequiredWarnings => {
+                        self.display_required_warnings = true;
                         true
                     }
                 }
