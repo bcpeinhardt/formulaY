@@ -8,12 +8,63 @@
 
     <style>
 
-        form {
-            margin: auto;
+        .formula-y-form * {
+            box-sizing: border-box;
+            line-height: 1.5;
         }
 
-        input {
-            display: block;
+        body {
+            padding: 25px;
+        }
+
+        .formula-y-form {
+            margin: auto;
+            font-family: sans-serif;
+            font-size: 16px;
+        }
+
+        .formula-y-form-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .formula-y-form-item > * {
+            align-self: flex-start;
+        }
+
+        .formula-y-txt-label, .formula-y-checkbox-label {
+            font-weight: bold;
+            padding: 10px 0;
+        }
+
+        .formula-y-txt-input {
+            -webkit-appearance: none;
+            width: 100%;
+            max-width: 425px;
+            padding: 0.8em;
+            font-size: 0.9em;
+            font-family: sans-serif;
+            outline: none;
+            border: 1px solid #dddddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            transition: background 0.25s, border-color 0.25s, color 0.25s;
+        }
+
+        .formula-y-txt-input:focus {
+            background: white;
+        }
+
+        .formula-y-checkbox-label {
+
+        }
+
+        .formula-y-checkbox {
+
+        }
+
+        .required {
+            color: red;
         }
 
     </style>
