@@ -193,7 +193,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
 
             quote! {
                 if self.inner.#field_ident == "" && self.display_required_warnings {
-                    <span style="color: red;" class="formul-y-required-asterisk">{"*"}</span>
+                    <span style="color: red;" class="formula-y-required-asterisk">{"*"}</span>
                 }
                 <label class={#label_class}>{#label}</label>
                 <input class={#input_class} type="text" onchange={ctx.link().callback(move |event: Event| {
@@ -213,7 +213,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
 
             quote! {
                 if !self.inner.#field_ident && self.display_required_warnings {
-                    <span style="color: red;">{"*"}</span>
+                    <span style="color: red;" class="formula-y-required-asterisk">{"*"}</span>
                 }
                 <label class={#label_class}>{#label}</label>
                 <input class={#input_class} type="checkbox" checked={self.inner.#field_ident} onchange={ctx.link().callback(move |event: Event| {
