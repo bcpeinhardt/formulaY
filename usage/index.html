@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,33 +7,71 @@
     <title>Document</title>
 
     <style>
-        * {
-            font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+
+        .formula-y-form * {
             box-sizing: border-box;
+            line-height: 1.5;
         }
 
-        form {
+        body {
+            padding: 25px;
+        }
+
+        .formula-y-form {
             margin: auto;
+            font-family: sans-serif;
+            font-size: 16px;
         }
 
-        input {
-            padding: 0.25rem;
-            display: block;
-            border-radius: 0.25rem;
-            border-color: rgb(9, 2, 40);
-            border-width: 0.5px;
-            border-style: solid;
+        .formula-y-form-item {
+            display: flex;
+            flex-direction: column;
         }
 
-        label {
-            color: rgb(9, 2, 40);
+        .formula-y-form-item > * {
+            align-self: flex-start;
+        }
+
+        .formula-y-txt-label, .formula-y-checkbox-label {
+            font-weight: bold;
+            padding: 10px 0;
+        }
+
+        .formula-y-txt-input {
+            -webkit-appearance: none;
+            width: 100%;
+            max-width: 425px;
+            padding: 0.8em;
+            font-size: 0.9em;
+            font-family: sans-serif;
+            outline: none;
+            border: 1px solid #dddddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            transition: background 0.25s, border-color 0.25s, color 0.25s;
+        }
+
+        .formula-y-txt-input:focus {
+            background: white;
+        }
+
+        .formula-y-checkbox-label {
+
+        }
+
+        .formula-y-checkbox {
+
+        }
+
+        .required {
+            color: #d50000;
+            background-color: #fff8f8;
+            border-color: #d50000;
         }
 
     </style>
 </head>
-
 <body>
-
+    
 </body>
-
 </html>
