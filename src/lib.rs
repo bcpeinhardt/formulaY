@@ -56,7 +56,7 @@ fn get_update_field_msg_variant_ident(field: &syn::Field, span_ident: &syn::Iden
     syn::Ident::new(&msg_variant, span_ident.span())
 }
 
-// 
+// This function returns the class values for labels and inputs of both String and bool fields
 fn get_label_and_input_classes(field_ident: &syn::Ident) -> (String, String, String, String) {
     let txt_label_class = format!(
         "{} formula-y-txt-label",
@@ -80,6 +80,17 @@ fn get_label_and_input_classes(field_ident: &syn::Ident) -> (String, String, Str
         bool_label_class,
         bool_input_class,
     )
+}
+
+fn get_class_getter_method_idents(
+    field_ident: &syn::Ident,
+    span_ident: &syn::Ident,
+) -> (syn::Ident, syn::Ident) {
+    let method_name_label = format!("get_class_for_{}_label", field_ident);
+    let method_name_label_ident = syn::Ident::new(&method_name_label, span_ident.span());
+    let method_name_input = format!("get_class_for_{}", field_ident);
+    let method_name_input_ident = syn::Ident::new(&method_name_input, span_ident.span());
+    (method_name_label_ident, method_name_input_ident)
 }
 
 #[proc_macro_derive(YForm)]
@@ -164,12 +175,8 @@ pub fn derive(input: TokenStream) -> TokenStream {
         let (txt_label_class, txt_input_class, bool_label_class, bool_input_class) =
             get_label_and_input_classes(&field_ident);
 
-        let method_name_label = format!("get_class_for_{}_label", field_ident);
-        let method_name_label_ident =
-            syn::Ident::new(&method_name_label, input_struct_ident.span());
-        let method_name_input = format!("get_class_for_{}", field_ident);
-        let method_name_input_ident =
-            syn::Ident::new(&method_name_input, input_struct_ident.span());
+        let (method_name_label_ident, method_name_input_ident) =
+            get_class_getter_method_idents(&field_ident, input_struct_ident);
 
         if field_is_string(field) {
             quote! {
@@ -233,10 +240,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
 
         let (txt_label_class, txt_input_class, bool_label_class, bool_input_class) = get_label_and_input_classes(&field_ident);
 
-        let method_name_label = format!("get_class_for_{}_label", field_ident);
-        let method_name_label_ident = syn::Ident::new(&method_name_label, input_struct_ident.span());
-        let method_name_input = format!("get_class_for_{}", field_ident);
-        let method_name_input_ident = syn::Ident::new(&method_name_input, input_struct_ident.span());
+        let (method_name_label_ident, method_name_input_ident) = get_class_getter_method_idents(&field_ident, input_struct_ident);
 
         if field_is_string(field) {
             quote! {
